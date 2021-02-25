@@ -5,8 +5,6 @@ import (
 	"log"
 	"strconv"
 	"time"
-
-	"k8s.io/api/core/v1"
 )
 
 // AssignedNonTerminatedPod selects pods that are assigned and non-terminal (scheduled and running).
@@ -171,7 +169,7 @@ func GetUpdatedPodEnvSpec(oldPod *v1.Pod, devId int, totalGPUMemByDev int) (newP
 
 		if gpuMem > 0 {
 			envs := []v1.EnvVar{
-				// v1.EnvVar{Name: EnvNVGPU, Value: fmt.Sprintf("%d", devId)},
+				v1.EnvVar{Name: EnvNVGPU, Value: fmt.Sprintf("%d", devId)},
 				v1.EnvVar{Name: EnvResourceIndex, Value: fmt.Sprintf("%d", devId)},
 				v1.EnvVar{Name: EnvResourceByPod, Value: fmt.Sprintf("%d", gpuMem)},
 				v1.EnvVar{Name: EnvResourceByDev, Value: fmt.Sprintf("%d", totalGPUMemByDev)},
@@ -196,6 +194,7 @@ func GetUpdatedPodAnnotationSpec(oldPod *v1.Pod, devId int, totalGPUMemByDev int
 	}
 
 	now := time.Now()
+	newPod.ObjectMeta.Annotations[EnvNVGPU] = fmt.Sprintf("%d", devId)
 	newPod.ObjectMeta.Annotations[EnvResourceIndex] = fmt.Sprintf("%d", devId)
 	newPod.ObjectMeta.Annotations[EnvResourceByDev] = fmt.Sprintf("%d", totalGPUMemByDev)
 	newPod.ObjectMeta.Annotations[EnvResourceByPod] = fmt.Sprintf("%d", GetGPUMemoryFromPodResource(newPod))
